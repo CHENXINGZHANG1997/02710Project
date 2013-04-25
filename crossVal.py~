@@ -1,0 +1,133 @@
+'''
+Created on Apr 13, 2013
+
+@author: Stuti Agrawal
+'''
+################################################################################
+# This code is to generate the cross-validation files for training and testing #
+# of the classifier. The input to this should be a list of tuples containing   #
+# label, time points, patient-ID and the time-series for the patient.          #
+# It also needs the fold value of the traning and testing set and the number   #
+# of times the experiment is required to be performed.                         #
+################################################################################
+import sys
+import random
+
+#Function to check whether the input data is valid.
+def is_valid_dataset(all_data, fold, n):
+    if(fold < 2):
+        sys.exit("Fold value is either negative or too small.")
+    if(all_data == []):
+        sys.exit("No data to classify")
+    if(n < 1):
+        sys.exit("Splitting must be performed for a positive number of times")
+    return True
+
+# Function to segregate the data based on labels.        
+def get_labeled_data(all_data):
+    labeled_data = dict()
+    for (label, time, patient, ts) in all_data:
+        if(label not in labeled_data):
+            labeled_data[label] = list()
+            assert(label in labeled_data)
+            labeled_data[label].append((label,time, patient, ts))
+    return labeled_data
+
+def add_to_set(num, labeled_data, out_set):
+    assert(num <= len(labeled_data))
+    init_len = len(out_set)
+    # Select a random index to add until the desired number of labeled
+    # data are added to the output set.
+    while(len(out_set) < init_len + num):
+        index = random.randint(0,len(labeled_data) - 1)
+        assert(0 <= index and index < len(labeled_data))
+        if(labeled_data[index] not in out_set):
+            out_set.append(labeled_data[index])
+    assert(len(out_set) == init_len + num)
+    return out_set
+  		
+def split_data(all_data, fold):
+    # Divide the dataset into k equal parts, where k is the number of folds.
+    total = len(all_data)
+    num_train = (total*(fold-1))/fold # Assign k-1 parts to the training set.
+    num_test = total - num_train # Assign the rest to the testing set.
+    # Segregate the data based on each label.
+    labeled_data = get_labeled_data(all_data)
+    train_set = list()
+    test_set = list()
+    for label in (labeled_data):
+        label_prop = float(len(labeled_data[label]))/total
+        # Generate the training and testing sets based on the proportion
+	# of each label in the entire dataset.
+        num_train_label = int(num_train*label_prop)
+        num_test_label = int(num_test*label_prop)
+        train_set = add_to_set(num_train_label, labeled_data[label], train_set)
+        test_set = add_to_set(num_test_label, labeled_data[label], test_set)
+    return(train_set, test_set)
+	
+def gen_train_test_sets(all_data, fold, n):
+    if(is_valid_dataset(all_data, fold, n)):
+	seg_data = list()
+        for i in xrange(n):
+            seg_data.append(split_data(all_data, fold))
+        return seg_data
+
+#Function to get the maximum number of time points in a time series.
+def get_max_time(all_data):
+    max_time = 0
+    for (label, time, patient, ts) in all_data:
+        if(len(time) > max_time):
+            max_time = len(time)
+    return max_time
+
+#Function to generate splits from 0 to time_point.        
+def gen_time_split_data(all_data, fold, n, time_point):
+    if(is_valid_dataset(all_data, fold, n)):
+        max_time = get_max_time(all_data)
+        assert(0 <= time_point and time_point < max_time)
+        time_data = list()
+        for (label, time, patient, ts) in all_data:
+            ts_split = list()
+            all_tp_present = True
+            count = 0
+            #Check if all time points from 0 to time_point are present in the
+            #time series of the patient.
+            for j in xrange(time_point):
+                if(j in time):
+                    # Add data for time point if present
+                    count += 1
+                    print len(ts), time.index(j), patient, time
+                    assert(len(ts) >= time.index(j))
+                    ts_split.append(ts[time.index(j)-1])
+                else:
+                    # Exit from loop even if one time point is not
+                    # present
+                    all_tp_present = False
+                    break
+            if(all_tp_present == True):
+                # If all time points are present, add the patient to 
+                # the respective time split.       
+                time_data.append((label, time, patient, ts_split))
+    return gen_train_test_sets(time_data, fold, n)
+################################################################################
+############################ Test Function #####################################
+
+def test_gen_train_test_sets():
+    all_data = [("good",[0,1], "0", [1,2]),
+                ("good",[0], "1", [0,2]),
+                ("good",[0,1,2], "2", [0,4,5]),
+                ("good",[0,1,2], "3", [5,2,6]),
+                ("good",[0], "4", [3,2]),
+                ("good",[0,1], "5", [4,2]),
+                ("bad",[1,3], "6", [6,5]),
+                ("bad",[4,5], "7", [7,5]),
+                ("bad",[5,6,7], "8", [6,5]),
+                ("bad",[4,6], "9", [1,5])]
+    print(type(all_data))
+    dat = gen_time_split_data(all_data, 2, 5, 1)
+    #dat = (gen_train_test_sets(all_data, 4, 3))
+    for val in dat:
+        print val
+        #print "\n\n"
+
+#test_gen_train_test_sets() 

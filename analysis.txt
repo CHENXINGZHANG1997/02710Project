@@ -1,0 +1,39 @@
+twedt0:   100.0   0.001   0.634615384615   0.01   0.5
+twedt1:   10.0   0.001   0.792307692308   1e-05   0.25
+twedt2:   1.0   0.001   0.829945054945   1e-05   0.25
+twedt3:   1.0   0.001   0.818956043956   1e-05   0.25
+twedt4:   100.0   0.001   0.794505494505   0.1   0.25
+twedt5:   1000.0   0.001   0.823351648352   0.1   1.0
+twedt6:  (10.0, 0.001, 0.83021978021978027, 0.001, 0.25)
+
+
+
+    #Optimal C =  10.0    Optimal S =  0.01    optimal Accuracy =  0.800824175824    for 13 genees
+    #Optimal C =  1000.0    Optimal S =  0.01    optimal Accuracy =  0.746153846154  for all genes
+    
+    normalizeValues(allData) #normalize data
+    
+    t0Data = cv.gen_time_split_data(allData, 0)
+    #Optimal C =  100.0    Optimal S =  100.0    optimal Accuracy =  0.603846153846  13genes
+    #Optimal C =  100.0    Optimal S =  100.0    optimal Accuracy =  0.607692307692  all genes
+    t1Data = cv.gen_time_split_data(allData, 1)
+    #Optimal C =  1000.0    Optimal S =  0.01    optimal Accuracy =  0.780769230769 13genes
+    #Optimal C =  100.0    Optimal S =  100.0    optimal Accuracy =  0.607692307692 all genes
+
+    t2Data = cv.gen_time_split_data(allData, 2)
+    #Optimal C =  10.0    Optimal S =  0.1    optimal Accuracy =  0.837087912088 13genes
+    #Optimal C =  10000.0    Optimal S =  0.01    optimal Accuracy =  0.68543956044 all genes
+
+    t3Data = cv.gen_time_split_data(allData, 3)
+    #Optimal C =  10000.0    Optimal S =  0.001    optimal Accuracy =  0.841483516484  13genes
+    #Optimal C =  1000.0    Optimal S =  0.001    optimal Accuracy =  0.637637362637   all genes
+
+    
+    t4Data = cv.gen_time_split_data(allData, 4)
+    #Optimal C =  10.0    Optimal S =  0.01    optimal Accuracy =  0.823076923077   13genes
+    #Optimal C =  1000.0    Optimal S =  0.01    optimal Accuracy =  0.743406593407 all genes
+
+    
+    t5Data = cv.gen_time_split_data(allData, 6)
+    #Optimal C =  1000.0    Optimal S =  0.001    optimal Accuracy =  0.826098901099   13genes
+    #Optimal C =  1000.0    Optimal S =  0.01    optimal Accuracy =  0.747527472527     all genes
